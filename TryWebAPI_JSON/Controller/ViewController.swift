@@ -8,9 +8,9 @@
 import UIKit
 
 class ViewController: UIViewController {
-
     @IBOutlet weak private var searchText: UISearchBar!
     @IBOutlet weak private var tableView: UITableView!
+    var okashiList: [(name: String, maker: String, link: URL, image: URL)] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,7 +23,6 @@ extension ViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         view.endEditing(true)
         if let searchWord = searchBar.text {
-            print(searchWord)
             searchOkashi(keyword: searchWord)
         }
     }
@@ -33,8 +32,31 @@ extension ViewController: UISearchBarDelegate {
         else { return }
         guard let req_url = URL(string: "https://sysbird.jp/toriko/api/?apikey=guest&format=json&keyword=\(keyword_encode)&max=10&order=r")
         else { return }
-        print(req_url)
-    }
 
+        let req = URLRequest(url: req_url)
+        let session = URLSession(configuration: .default, delegate: nil, delegateQueue: OperationQueue.main)
+        let task = session.dataTask(with: req) { data, response, error in
+            session.finishTasksAndInvalidate()
+            do {
+                let decoder = JSONDecoder()
+                let json = try decoder.decode(ResultJson.self, from: data!)
+                if let items = json.item {
+                    for item in items {
+                        if let name = item.name, let maker = item.maker, let link = item.url, let image = item.image {
+                            let okashi = (name, maker, link, image)
+                            self.okashiList.append(okashi)
+                        }
+                    }
+                    if let okashidbg = self.okashiList.first {
+                        print("---------")
+                        print("okashiList[0] = \(okashidbg)")
+                    }
+                }
+            } catch {
+                print("エラー発生")
+            }
+        }
+        task.resume()
+    }
 }
 
