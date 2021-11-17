@@ -7,13 +7,15 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UISearchBarDelegate {
+
+    @IBOutlet weak private var searchText: UISearchBar!
+    @IBOutlet weak private var tableView: UITableView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        searchText.delegate = self
+        searchText.placeholder = "お菓子の名前を入力してください"
     }
-
-
 }
 
