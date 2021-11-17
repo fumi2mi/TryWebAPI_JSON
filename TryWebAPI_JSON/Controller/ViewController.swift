@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SafariServices
 
 class ViewController: UIViewController {
     @IBOutlet weak private var searchText: UISearchBar!
@@ -17,6 +18,7 @@ class ViewController: UIViewController {
         searchText.delegate = self
         searchText.placeholder = "お菓子の名前を入力してください"
         tableView.dataSource = self
+        tableView.delegate = self
     }
 }
 
@@ -75,5 +77,20 @@ extension ViewController: UITableViewDataSource {
             cell.imageView?.image = UIImage(data: imageData)
         }
         return cell
+    }
+}
+
+extension ViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let safariViewController = SFSafariViewController(url: okashiList[indexPath.row].link)
+        safariViewController.delegate = self
+        present(safariViewController, animated: true)
+    }
+}
+
+extension ViewController: SFSafariViewControllerDelegate {
+    func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
+        dismiss(animated: true, completion: nil)
     }
 }
