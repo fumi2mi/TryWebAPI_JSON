@@ -16,6 +16,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         searchText.delegate = self
         searchText.placeholder = "お菓子の名前を入力してください"
+        tableView.dataSource = self
     }
 }
 
@@ -41,12 +42,14 @@ extension ViewController: UISearchBarDelegate {
                 let decoder = JSONDecoder()
                 let json = try decoder.decode(ResultJson.self, from: data!)
                 if let items = json.item {
+                    self.okashiList.removeAll()
                     for item in items {
                         if let name = item.name, let maker = item.maker, let link = item.url, let image = item.image {
                             let okashi = (name, maker, link, image)
                             self.okashiList.append(okashi)
                         }
                     }
+                    self.tableView.reloadData()
                     if let okashidbg = self.okashiList.first {
                         print("---------")
                         print("okashiList[0] = \(okashidbg)")
@@ -60,3 +63,17 @@ extension ViewController: UISearchBarDelegate {
     }
 }
 
+extension ViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return okashiList.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        cell.textLabel?.text = okashiList[indexPath.row].name
+        if let imageData = try? Data(contentsOf: okashiList[indexPath.row].image) {
+            cell.imageView?.image = UIImage(data: imageData)
+        }
+        return cell
+    }
+}
